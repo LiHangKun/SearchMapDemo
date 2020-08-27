@@ -179,12 +179,11 @@ public  class MainActivity extends AppCompatActivity implements LocateRecyclerAd
         for(int j=0;j<list.size();j++){
             String name = list.get(j).getName();
             String address = list.get(j).getAddress();
-            LocationInfo locationInfo = new LocationInfo();
+            /*LocationInfo locationInfo = new LocationInfo();
             locationInfo.setAddress(name);
+            locationInfo.setLatitude(list.get(j).getPoint().getLatitude()); //获取经纬度
+            locationInfo.setLonTitude(list.get(j).getPoint().getLongitude());*///获取经纬度
 
-            locationInfo.setLatitude(list.get(j).getPoint().getLatitude());
-            locationInfo.setLonTitude(list.get(j).getPoint().getLongitude());
-            mList.add(locationInfo);
             Log.i("ddddddddddd",""+name+"      "+address+"     "+list.get(j).getDistrict()+"        "+list.get(j).getPoint());
         }
     }
