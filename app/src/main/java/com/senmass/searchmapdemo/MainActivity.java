@@ -16,6 +16,9 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
+import com.amap.api.services.help.Inputtips;
+import com.amap.api.services.help.InputtipsQuery;
+import com.amap.api.services.help.Tip;
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
 
@@ -28,7 +31,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public  class MainActivity extends AppCompatActivity implements LocateRecyclerAdapter.OnLocationItemClick, AMapLocationListener, PoiSearch.OnPoiSearchListener {
+public  class MainActivity extends AppCompatActivity implements LocateRecyclerAdapter.OnLocationItemClick, AMapLocationListener, PoiSearch.OnPoiSearchListener, Inputtips.InputtipsListener {
 
     public AMapLocationClient mlocationClient = null;
     @BindView(R.id.locate_recycler)
@@ -93,6 +96,8 @@ public  class MainActivity extends AppCompatActivity implements LocateRecyclerAd
                 locationInfo.setAddress(amapLocation.getAddress());
                 locationInfo.setLatitude(latitude);
                 locationInfo.setLonTitude(longitude);
+
+                //这一段代码放在监听 EditText 监听文字改变的地方就可以达到边输入 边出来下面的周围地址     基本不用改就改一个地方我在下面标注
                 mList.clear();
                 mList.add(locationInfo);
                 mAdapter.notifyDataSetChanged();
@@ -105,6 +110,14 @@ public  class MainActivity extends AppCompatActivity implements LocateRecyclerAd
                 search.setBound(new PoiSearch.SearchBound(new LatLonPoint(latitude, longitude), 10000));
                 search.setOnPoiSearchListener(this);
                 search.searchPOIAsyn();
+                //！！！！！！前面第一个参数改成 你EditText 监听改变出来的文字就是你想输入的比如超市   第二个就是这个东西在哪个城市可以为空 意思就是全国搜索超市 填了天津就是 在天津搜索超市
+                InputtipsQuery inputquery = new InputtipsQuery("嘉里汇", "天津市");
+                inputquery.setCityLimit(true);//限制在当前城市
+                Inputtips inputTips = new Inputtips(MainActivity.this, inputquery);
+                inputTips.setInputtipsListener(MainActivity.this);
+                inputTips.requestInputtipsAsyn();
+                //
+
 
             } else {
                 //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
@@ -157,6 +170,22 @@ public  class MainActivity extends AppCompatActivity implements LocateRecyclerAd
                 initLocate();
                 Toast.makeText(this, "正在重定位", Toast.LENGTH_SHORT).show();
                 break;
+        }
+    }
+
+    @Override
+    public void onGetInputtips(List<Tip> list, int i) {
+        //这个是你搜索超市出来的周边的地方
+        for(int j=0;j<list.size();j++){
+            String name = list.get(j).getName();
+            String address = list.get(j).getAddress();
+            LocationInfo locationInfo = new LocationInfo();
+            locationInfo.setAddress(name);
+
+            locationInfo.setLatitude(list.get(j).getPoint().getLatitude());
+            locationInfo.setLonTitude(list.get(j).getPoint().getLongitude());
+            mList.add(locationInfo);
+            Log.i("ddddddddddd",""+name+"      "+address+"     "+list.get(j).getDistrict()+"        "+list.get(j).getPoint());
         }
     }
 }
